@@ -3,6 +3,7 @@ package com.ims.backend.controller;
 import com.ims.backend.dto.ShipmentRequestDto;
 import com.ims.backend.dto.ShipmentResponseDto;
 import com.ims.backend.service.ShipmentService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public class ShipmentController {
     }
 
     @PostMapping
-    public ShipmentResponseDto create(@RequestBody ShipmentRequestDto dto) {
+    public ShipmentResponseDto create(@Valid @RequestBody ShipmentRequestDto dto) {
         return shipmentService.save(dto);
     }
 

@@ -3,6 +3,7 @@ package com.ims.backend.controller;
 import com.ims.backend.dto.CategoryRequestDto;
 import com.ims.backend.dto.CategoryResponseDto;
 import com.ims.backend.service.CategoryService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public class CategoryController {
     }
 
     @PostMapping
-    public CategoryResponseDto create(@RequestBody CategoryRequestDto dto) {
+    public CategoryResponseDto create(@Valid @RequestBody CategoryRequestDto dto) {
         return categoryService.save(dto);
     }
 

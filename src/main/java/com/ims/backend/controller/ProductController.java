@@ -3,6 +3,7 @@ package com.ims.backend.controller;
 import com.ims.backend.dto.ProductRequestDto;
 import com.ims.backend.dto.ProductResponseDto;
 import com.ims.backend.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public class ProductController {
     }
 
     @PostMapping
-    public ProductResponseDto create(@RequestBody ProductRequestDto dto) {
+    public ProductResponseDto create(@Valid @RequestBody ProductRequestDto dto) {
         return productService.save(dto);
     }
 

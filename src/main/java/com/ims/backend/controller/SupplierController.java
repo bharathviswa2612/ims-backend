@@ -3,6 +3,7 @@ package com.ims.backend.controller;
 import com.ims.backend.dto.SupplierRequestDto;
 import com.ims.backend.dto.SupplierResponseDto;
 import com.ims.backend.service.SupplierService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public class SupplierController {
     }
 
     @PostMapping
-    public SupplierResponseDto create(@RequestBody SupplierRequestDto dto) {
+    public SupplierResponseDto create(@Valid @RequestBody SupplierRequestDto dto) {
         return supplierService.save(dto);
     }
 
