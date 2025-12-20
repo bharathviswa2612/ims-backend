@@ -4,6 +4,7 @@ import com.ims.backend.dto.ProductRequestDto;
 import com.ims.backend.dto.ProductResponseDto;
 import com.ims.backend.service.ProductService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,10 +19,27 @@ public class ProductController {
         this.productService = productService;
     }
 
+    @GetMapping("/paged")
+    public Page<ProductResponseDto> getAllPaginated(
+            @RequestParam int page,
+            @RequestParam int size) {
+
+        return productService.getAllPaginated(page, size);
+    }
     @PostMapping
     public ProductResponseDto create(@Valid @RequestBody ProductRequestDto dto) {
         return productService.save(dto);
     }
+
+    @PostMapping("/list")
+    public List<ProductResponseDto> create(@Valid @RequestBody List<@Valid ProductRequestDto> dto) {
+        return productService.saveAll(dto);
+    }
+
+
+
+
+
 
     @GetMapping("/{id}")
     public ProductResponseDto getById(@PathVariable String id) {
