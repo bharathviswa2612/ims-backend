@@ -1,26 +1,27 @@
 package com.ims.backend.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
-
 @Entity
-@Data
+@Table(name = "categories")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Category {
 
     @Id
+    @Column(nullable = false, updatable = false)
     private String id;   // CAT-001
 
+    @Column(nullable = false)
     private String name;
-    private String description;
-    private Boolean active;
 
-    @OneToMany(mappedBy = "category")
-    private List<Product> products;
+    @Column(length = 255)
+    private String description;
+
+    @Column(nullable = false)
+    private Boolean active = true;
 }

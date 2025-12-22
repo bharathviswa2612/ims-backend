@@ -1,30 +1,39 @@
 package com.ims.backend.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
 
 @Entity
-@Data
+@Table(name = "shipments")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Shipment {
 
     @Id
+    @Column(nullable = false, updatable = false)
     private String id;   // SHIP-001
 
+    @Column(nullable = false)
     private String shipmentCode;
-    private String trackingNumber;
-    private LocalDate shipmentDate;
-    private String status;
-    private Boolean active;
 
-    @ManyToOne
-    @JoinColumn(name = "supplier_id")
+    @Column(nullable = false)
+    private String trackingNumber;
+
+    @Column(nullable = false)
+    private LocalDate shipmentDate;
+
+    @Column(nullable = false)
+    private String status;
+
+    @Column(nullable = false)
+    private Boolean active = true;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "supplier_id", nullable = false)
     private Supplier supplier;
 }

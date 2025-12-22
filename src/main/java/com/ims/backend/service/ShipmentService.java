@@ -4,13 +4,20 @@ import com.ims.backend.dto.ShipmentRequestDto;
 import com.ims.backend.dto.ShipmentResponseDto;
 import com.ims.backend.entity.Shipment;
 import com.ims.backend.entity.Supplier;
+import com.ims.backend.exception.ResourceNotFoundException;
 import com.ims.backend.repository.ShipmentRepository;
 import com.ims.backend.repository.SupplierRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class ShipmentService {
 
@@ -24,7 +31,11 @@ public class ShipmentService {
     }
 
     public ShipmentResponseDto save(ShipmentRequestDto dto) {
-        Supplier supplier = supplierRepository.findById(dto.getSupplierId()).orElse(null);
+
+        log.debug("Saving shipment");
+
+        Supplier supplier = supplierRepository.findByIdAndActiveTrue(dto.getSupplierId())
+                .orElseThrow(() -> new ResourceNotFoundException("Supplier not found"));
 
         Shipment shipment = Shipment.builder()
                 .id(dto.getId())
@@ -40,23 +51,83 @@ public class ShipmentService {
     }
 
     public ShipmentResponseDto getById(String id) {
-        return shipmentRepository.findById(id)
+        return shipmentRepository.findByIdAndActiveTrue(id)
                 .map(this::mapToResponse)
-                .orElse(null);
+                .orElseThrow(() -> new ResourceNotFoundException("Shipment not found"));
     }
 
     public List<ShipmentResponseDto> getAll() {
-        return shipmentRepository.findAll()
+        return shipmentRepository.findByActiveTrue()
                 .stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
+    public Page<ShipmentResponseDto> getAllPaginated(int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        return shipmentRepository.findByActiveTrue(pageable)
+                .map(this::mapToResponse);
+    }
+
+    public ShipmentResponseDto update(String id, ShipmentRequestDto dto) {
+
+        Shipment shipment = shipmentRepository.findByIdAndActiveTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Shipment not found"));
+
+        Supplier supplier = supplierRepository.findByIdAndActiveTrue(dto.getSupplierId())
+                .orElseThrow(() -> new ResourceNotFoundException("Supplier not found"));
+
+        shipment.setShipmentCode(dto.getShipmentCode());
+        shipment.setTrackingNumber(dto.getTrackingNumber());
+        shipment.setShipmentDate(dto.getShipmentDate());
+        shipment.setSupplier(supplier);
+
+        Shipment updated = shipmentRepository.save(shipment);
+        log.debug("Shipment {} updated", id);
+
+        return mapToResponse(updated);
+    }
+
     public void disable(String id) {
-        shipmentRepository.findById(id).ifPresent(shipment -> {
-            shipment.setActive(false);
-            shipmentRepository.save(shipment);
-        });
+
+        Shipment shipment = shipmentRepository.findByIdAndActiveTrue(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Shipment not found"));
+
+        shipment.setActive(false);
+        shipmentRepository.save(shipment);
+
+        log.info("Shipment {} disabled", id);
+    }
+
+    public List<ShipmentResponseDto> saveAll(List<ShipmentRequestDto> dtoList) {
+
+        log.debug("Saving {} shipments", dtoList.size());
+
+        List<Shipment> shipments = new ArrayList<>();
+
+        for (ShipmentRequestDto dto : dtoList) {
+
+            Supplier supplier = supplierRepository.findByIdAndActiveTrue(dto.getSupplierId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Supplier not found"));
+
+            Shipment shipment = Shipment.builder()
+                    .id(dto.getId())
+                    .shipmentCode(dto.getShipmentCode())
+                    .trackingNumber(dto.getTrackingNumber())
+                    .shipmentDate(dto.getShipmentDate())
+                    .status("CREATED")
+                    .supplier(supplier)
+                    .active(true)
+                    .build();
+
+            shipments.add(shipment);
+        }
+
+        return shipmentRepository.saveAll(shipments)
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
     }
 
     private ShipmentResponseDto mapToResponse(Shipment shipment) {
@@ -67,9 +138,7 @@ public class ShipmentService {
         dto.setShipmentDate(shipment.getShipmentDate());
         dto.setStatus(shipment.getStatus());
         dto.setActive(shipment.getActive());
-        dto.setSupplierId(
-                shipment.getSupplier() != null ? shipment.getSupplier().getId() : null
-        );
+        dto.setSupplierId(shipment.getSupplier().getId());
         return dto;
     }
 }

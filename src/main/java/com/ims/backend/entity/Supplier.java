@@ -1,27 +1,30 @@
 package com.ims.backend.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
-
 @Entity
-@Data
+@Table(name = "suppliers")
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Supplier {
 
     @Id
+    @Column(nullable = false, updatable = false)
     private String id;   // SUP-001
 
+    @Column(nullable = false)
     private String name;
-    private String supplierCode;
-    private String phone;
-    private Boolean active;
 
-    @OneToMany(mappedBy = "supplier")
-    private List<Shipment> shipments;
+    @Column(nullable = false, length = 50)
+    private String supplierCode;
+
+    @Column(nullable = false, length = 15)
+    private String phone;
+
+    @Column(nullable = false)
+    private Boolean active = true;
 }
